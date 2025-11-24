@@ -17,6 +17,7 @@ to print all 12 queries in the dialect of your choice. Currently supported diale
 - Geopandas (distinct case)
 - SedonaDB
 - SedonaSpark
+- Spatial Polars
 
 
 We tried to vary the queries only as much as necessary to accommodate dialect differences.
@@ -26,6 +27,10 @@ to include it. Pandas/Geopandas users often hand optimize their queries in ways 
 We felt hand-tuning the queries was unfair for this exercise, and tried to do as little of that as possible while still
 writing "idiomatic" pandas code. We would be interested in hearing feedback on this approach as well as seeing a "fully
 hand-optimized" version of the queries.
+
+[Spatial Polars](https://atl2001.github.io/spatial_polars), like Geopandas, is not SQL-based.  It uses shapely to extend
+polars, enabling it to work with geospatial data similar to how Geopandas extends pandas.  It is much newer and nowhere 
+near as popular/tested as Geopandas, but is capable of computing all of the spatial bench queries, and has been included.
 
 We welcome contributions and civil discussions on how to improve the queries and their implementations.
 
