@@ -1,0 +1,11 @@
+Cargo.lock
+*.ipynb
+*.json
+*.svg
+site/**
+docs-overrides/**
+raster/output/**
+spatialbench/data/sf-v1/*.tbl.gz
+spatialbench/data/sf-v1/*.parquet
+dev/release/rat_exclude_files.txt
+
