@@ -25,6 +25,8 @@ version = { workspace = true }
 edition = { workspace = true }
 homepage = { workspace = true }
 license = { workspace = true }
+keywords = ["spatial", "geospatial", "benchmark", "data-generation", "sql"]
+categories = ["science::geo", "database", "data-structures", "development-tools"]
 
 # Designed to have no depdencies to make it easy to embed in other projects
 # See ../ARCHITECTURE.md for more details
