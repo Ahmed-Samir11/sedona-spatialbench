@@ -1,0 +1,32 @@
+# SpatialBench Benchmark Runner Dependencies
+#
+# Install with: pip install -r benchmark-requirements.txt
+#
+# Each engine has optional dependencies. Install only what you need.
+
+# === Core Dependencies (always required) ===
+# (none - pure Python benchmark framework)
+
+# === DuckDB Engine (reference implementation) ===
+duckdb>=1.0.0
+
+# === Apache Sedona (Spark) Engine ===
+# Uncomment to enable Sedona/Spark support:
+# pyspark>=3.4.0
+# apache-sedona>=1.5.0
+
+# === Databricks Engine ===
+# Uncomment to enable Databricks support:
+# databricks-sql-connector>=2.0.0
+
+# === GeoPandas Engine ===
+# Uncomment to enable GeoPandas support:
+# geopandas>=0.14.0
+# pandas>=2.0.0
+# shapely>=2.0.0
+# pyarrow>=14.0.0
+
+# === Polars + spatial_polars Engine ===
+# Uncomment to enable Polars support:
+# polars>=1.0.0
+# spatial-polars>=0.1.0
