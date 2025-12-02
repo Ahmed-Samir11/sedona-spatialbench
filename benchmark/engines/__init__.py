@@ -31,6 +31,7 @@ from benchmark.engines.sedona_engine import SedonaSparkEngine
 from benchmark.engines.databricks_engine import DatabricksEngine
 from benchmark.engines.geopandas_engine import GeopandasEngine
 from benchmark.engines.polars_engine import SpatialPolarsEngine
+from benchmark.engines.sedonadb_engine import SedonaDBEngine
 
 # Registry of available engines
 # Key: CLI argument name (lowercase)
@@ -41,6 +42,7 @@ ENGINES: dict[str, Type[BenchmarkEngine]] = {
     "databricks": DatabricksEngine,
     "geopandas": GeopandasEngine,
     "polars": SpatialPolarsEngine,
+    "sedonadb": SedonaDBEngine,
 }
 
 
@@ -78,4 +80,5 @@ __all__ = [
     "DatabricksEngine",
     "GeopandasEngine",
     "SpatialPolarsEngine",
+    "SedonaDBEngine",
 ]
