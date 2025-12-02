@@ -156,3 +156,52 @@ are currently all derived from `Cargo.toml`, which can be updated to:
 [workspace.package]
 version = "0.2.0"
 ```
+
+## Publishing to crates.io
+
+After a successful Apache release, the Rust crates can be published to [crates.io](https://crates.io).
+
+### Prerequisites
+
+1. **crates.io account**: Create an account at <https://crates.io> if you don't have one
+2. **API token**: Generate an API token from <https://crates.io/me>
+3. **Login to cargo**: Authenticate cargo with your API token:
+   ```shell
+   cargo login <your-api-token>
+   ```
+4. **Verify ownership**: Ensure you have owner permissions for the crates on crates.io. If this is the first publish, you'll automatically become an owner.
+
+### Pre-publish checks
+
+Before publishing, verify that:
+
+1. All tests pass:
+   ```shell
+   cargo test --workspace
+   ```
+
+2. The workspace builds successfully:
+   ```shell
+   cargo build --workspace --release
+   ```
+
+3. Check for any issues with `cargo publish --dry-run`:
+   ```shell
+   cd spatialbench && cargo publish --dry-run
+   cd ../spatialbench-arrow && cargo publish --dry-run
+   cd ../spatialbench-cli && cargo publish --dry-run
+   ```
+
+### Publishing order
+
+The crates will be published in dependency order. The correct order is:
+
+1. `spatialbench` (no workspace dependencies)
+2. `spatialbench-arrow` (depends on `spatialbench`)
+3. `spatialbench-cli` (depends on both `spatialbench` and `spatialbench-arrow`)
+
+To publish, run this command:
+
+```shell
+cargo publish
+```
