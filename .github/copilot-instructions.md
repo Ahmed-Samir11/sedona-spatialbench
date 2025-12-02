@@ -177,6 +177,7 @@ class MyEngine(BenchmarkEngine):
 |------------|--------------|----------------|----------------------------------|
 | duckdb     | DuckDB       | SQL            | duckdb                           |
 | sedona     | SedonaSpark  | SQL            | pyspark, apache-sedona           |
+| sedonadb   | SedonaDB     | SQL            | apache-sedona, sedonadb          |
 | databricks | Databricks   | SQL            | databricks-sql-connector         |
 | geopandas  | Geopandas    | function-based | geopandas, pandas, shapely       |
 | polars     | Polars       | function-based | polars, spatial-polars           |

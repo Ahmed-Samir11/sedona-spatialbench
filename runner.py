@@ -47,7 +47,7 @@ from pathlib import Path
 from typing import Optional
 
 from benchmark.engines import get_engine, list_engines, ENGINES
-from benchmark.engine_base import BenchmarkEngine, QueryResult
+from benchmark.engine_base import BenchmarkEngine, QueryResult, TimedExecution
 from benchmark.query_provider import get_queries, list_queries, get_query_count
 from benchmark.reporting import (
     BenchmarkSummary,
@@ -74,6 +74,7 @@ def run_benchmark(
     iterations: int = 1,
     queries: Optional[list[str]] = None,
     warmup: bool = True,
+    include_load_time: bool = False,
 ) -> BenchmarkSummary:
     """Run benchmark queries against an engine.
 
@@ -84,6 +85,7 @@ def run_benchmark(
         iterations: Number of times to run each query
         queries: Specific queries to run (None = all)
         warmup: Whether to run warmup before benchmarks
+        include_load_time: Whether to include data load time in total
 
     Returns:
         BenchmarkSummary with all results
@@ -92,6 +94,7 @@ def run_benchmark(
         engine=engine.name,
         scale_factor=scale_factor,
         iterations=iterations,
+        include_load_time=include_load_time,
     )
 
     # Connect and load data
@@ -101,7 +104,10 @@ def run_benchmark(
     logger.info(f"Engine version: {summary.engine_version}")
 
     logger.info(f"Loading data from {data_dir}...")
-    engine.load_data(data_dir, scale_factor)
+    with TimedExecution() as load_timer:
+        engine.load_data(data_dir, scale_factor)
+    summary.load_time = load_timer.elapsed
+    logger.info(f"Data loaded in {summary.load_time:.2f}s")
 
     # Run warmup if requested
     if warmup:
@@ -243,6 +249,12 @@ For more information, see: https://github.com/apache/sedona-spatialbench
     )
 
     parser.add_argument(
+        "--include-load-time",
+        action="store_true",
+        help="Include data loading time in total benchmark time (matches original methodology)",
+    )
+
+    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -329,6 +341,7 @@ For more information, see: https://github.com/apache/sedona-spatialbench
                     iterations=args.iterations,
                     queries=query_list,
                     warmup=not args.no_warmup,
+                    include_load_time=args.include_load_time,
                 )
                 summaries.append(summary)
         except Exception as e:
@@ -353,7 +366,10 @@ For more information, see: https://github.com/apache/sedona-spatialbench
         print(f"Scale Factor: {summary.scale_factor}")
         print(f"Iterations: {summary.iterations}")
         print(f"Successful: {summary.successful_queries}/{summary.total_queries}")
-        print(f"Total Time: {summary.total_time:.2f}s")
+        print(f"Query Time: {summary.total_time:.2f}s")
+        print(f"Load Time: {summary.load_time:.2f}s")
+        if summary.include_load_time:
+            print(f"Total Time (incl. load): {summary.get_total_time():.2f}s")
         print()
 
         if summary.iterations > 1:

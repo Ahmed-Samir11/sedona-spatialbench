@@ -46,6 +46,8 @@ class BenchmarkSummary:
         engine_version: Version of the database engine
         scale_factor: Scale factor of the benchmark data
         iterations: Number of iterations per query
+        load_time: Time taken to load data (seconds)
+        include_load_time: Whether to include load time in total
     """
 
     engine: str
@@ -58,6 +60,8 @@ class BenchmarkSummary:
     scale_factor: float = 1.0
     iterations: int = 1
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    load_time: float = 0.0
+    include_load_time: bool = False
 
     def add_result(self, result: QueryResult) -> None:
         """Add a query result to the summary."""
@@ -126,6 +130,16 @@ class BenchmarkSummary:
 
         return aggregated
 
+    def get_total_time(self) -> float:
+        """Get total time, optionally including data load time.
+
+        Returns:
+            Total time in seconds (query time + load time if include_load_time is True)
+        """
+        if self.include_load_time:
+            return self.total_time + self.load_time
+        return self.total_time
+
     def to_dict(self) -> dict:
         """Convert summary to dictionary for JSON serialization."""
         return {
@@ -138,7 +152,10 @@ class BenchmarkSummary:
                 "total_queries": self.total_queries,
                 "successful_queries": self.successful_queries,
                 "failed_queries": self.failed_queries,
-                "total_time_seconds": self.total_time,
+                "total_time_seconds": self.get_total_time(),
+                "query_time_seconds": self.total_time,
+                "load_time_seconds": self.load_time,
+                "include_load_time": self.include_load_time,
             },
             "aggregated_results": self.get_aggregated_results(),
             "raw_results": [r.to_dict() for r in self.results],

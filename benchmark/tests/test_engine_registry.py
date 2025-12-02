@@ -33,6 +33,7 @@ from benchmark.engines import (
     list_engines,
     DuckDBEngine,
     SedonaSparkEngine,
+    SedonaDBEngine,
     DatabricksEngine,
     GeopandasEngine,
     SpatialPolarsEngine,
@@ -45,7 +46,7 @@ class TestEngineRegistry:
 
     def test_all_expected_engines_registered(self):
         """All expected engines are registered in ENGINES."""
-        expected_engines = {"duckdb", "sedona", "databricks", "geopandas", "polars"}
+        expected_engines = {"duckdb", "sedona", "sedonadb", "databricks", "geopandas", "polars"}
         registered_engines = set(ENGINES.keys())
 
         assert expected_engines == registered_engines
@@ -54,6 +55,7 @@ class TestEngineRegistry:
         """Registry maps engine names to correct classes."""
         assert ENGINES["duckdb"] is DuckDBEngine
         assert ENGINES["sedona"] is SedonaSparkEngine
+        assert ENGINES["sedonadb"] is SedonaDBEngine
         assert ENGINES["databricks"] is DatabricksEngine
         assert ENGINES["geopandas"] is GeopandasEngine
         assert ENGINES["polars"] is SpatialPolarsEngine

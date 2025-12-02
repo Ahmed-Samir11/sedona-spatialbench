@@ -100,6 +100,36 @@ class TestBenchmarkSummary:
 
         assert summary.total_time == pytest.approx(1.0)
 
+    def test_load_time_default_is_zero(self):
+        """load_time defaults to 0.0."""
+        summary = BenchmarkSummary(engine="test", scale_factor=1.0, iterations=1)
+
+        assert summary.load_time == 0.0
+
+    def test_include_load_time_default_is_false(self):
+        """include_load_time defaults to False."""
+        summary = BenchmarkSummary(engine="test", scale_factor=1.0, iterations=1)
+
+        assert summary.include_load_time is False
+
+    def test_get_total_time_without_load_time(self):
+        """get_total_time() returns query time only when include_load_time is False."""
+        summary = BenchmarkSummary(engine="test", scale_factor=1.0, iterations=1)
+        summary.add_result(QueryResult(query_name="q1", engine="test", success=True, duration_seconds=5.0))
+        summary.load_time = 10.0
+        summary.include_load_time = False
+
+        assert summary.get_total_time() == pytest.approx(5.0)
+
+    def test_get_total_time_with_load_time(self):
+        """get_total_time() includes load time when include_load_time is True."""
+        summary = BenchmarkSummary(engine="test", scale_factor=1.0, iterations=1)
+        summary.add_result(QueryResult(query_name="q1", engine="test", success=True, duration_seconds=5.0))
+        summary.load_time = 10.0
+        summary.include_load_time = True
+
+        assert summary.get_total_time() == pytest.approx(15.0)
+
 
 class TestBenchmarkSummaryAggregation:
     """Tests for BenchmarkSummary result aggregation."""
@@ -203,6 +233,20 @@ class TestBenchmarkSummaryToDict:
         assert d["raw_results"][0]["query_name"] == "q1"
         assert d["raw_results"][0]["duration_seconds"] == 1.5
         assert d["raw_results"][0]["row_count"] == 100
+
+    def test_to_dict_includes_load_time_fields(self):
+        """to_dict() includes load time information in summary."""
+        summary = BenchmarkSummary(engine="test", scale_factor=1.0, iterations=1)
+        summary.add_result(QueryResult(query_name="q1", engine="test", success=True, duration_seconds=5.0))
+        summary.load_time = 10.0
+        summary.include_load_time = True
+
+        d = summary.to_dict()
+
+        assert d["summary"]["load_time_seconds"] == 10.0
+        assert d["summary"]["query_time_seconds"] == 5.0
+        assert d["summary"]["total_time_seconds"] == 15.0  # query + load
+        assert d["summary"]["include_load_time"] is True
 
 
 class TestSaveJson:

@@ -16,15 +16,15 @@
 #  under the License.
 
 """
-Integration tests for the DuckDB engine.
+Integration tests for the SedonaDB engine.
 
-These tests verify the DuckDB engine implementation works end-to-end:
+These tests verify the SedonaDB engine implementation works end-to-end:
 1. Connection and disconnection
 2. Data loading from Parquet files
 3. Query execution with timing
 4. Warmup functionality
 
-Note: These tests require DuckDB to be installed.
+Note: These tests require sedonadb and apache-sedona to be installed.
 """
 
 import tempfile
@@ -32,96 +32,96 @@ from pathlib import Path
 
 import pytest
 
-# Skip all tests if DuckDB is not installed
-duckdb = pytest.importorskip("duckdb")
+# Skip all tests if SedonaDB is not installed
+sedonadb = pytest.importorskip("sedonadb")
+pytest.importorskip("sedona.db")
 
-from benchmark.engines.duckdb_engine import DuckDBEngine
+from benchmark.engines.sedonadb_engine import SedonaDBEngine
 from benchmark.engine_base import QueryResult
 
 
-class TestDuckDBEngineProperties:
-    """Tests for DuckDBEngine property values."""
+class TestSedonaDBEngineProperties:
+    """Tests for SedonaDBEngine property values."""
 
-    def test_name_is_duckdb(self):
-        """Engine name is 'duckdb'."""
-        engine = DuckDBEngine()
-        assert engine.name == "duckdb"
+    def test_name_is_sedonadb(self):
+        """Engine name is 'sedonadb'."""
+        engine = SedonaDBEngine()
+        assert engine.name == "sedonadb"
 
-    def test_dialect_is_duckdb(self):
-        """Engine dialect is 'DuckDB'."""
-        engine = DuckDBEngine()
-        assert engine.dialect == "DuckDB"
+    def test_dialect_is_sedonadb(self):
+        """Engine dialect is 'SedonaDB'."""
+        engine = SedonaDBEngine()
+        assert engine.dialect == "SedonaDB"
 
     def test_uses_sql_is_true(self):
         """Engine uses SQL queries."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
         assert engine.uses_sql is True
 
 
-class TestDuckDBEngineConnection:
-    """Tests for DuckDB connection management."""
+class TestSedonaDBEngineConnection:
+    """Tests for SedonaDB connection management."""
 
-    def test_connect_creates_connection(self):
-        """connect() creates a DuckDB connection."""
-        engine = DuckDBEngine()
+    def test_connect_creates_context(self):
+        """connect() creates a SedonaDB context."""
+        engine = SedonaDBEngine()
 
         engine.connect()
 
-        assert engine._conn is not None
+        assert engine._ctx is not None
         engine.close()
 
-    def test_close_releases_connection(self):
-        """close() releases the DuckDB connection."""
-        engine = DuckDBEngine()
+    def test_close_releases_context(self):
+        """close() releases the SedonaDB context."""
+        engine = SedonaDBEngine()
         engine.connect()
 
         engine.close()
 
-        assert engine._conn is None
+        assert engine._ctx is None
 
     def test_context_manager_connects_and_closes(self):
         """Context manager handles connection lifecycle."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
 
         with engine:
-            assert engine._conn is not None
+            assert engine._ctx is not None
 
-        assert engine._conn is None
+        assert engine._ctx is None
 
-    def test_get_version_returns_duckdb_version(self):
-        """get_version() returns DuckDB version string."""
-        engine = DuckDBEngine()
+    def test_get_version_returns_version_string(self):
+        """get_version() returns a version string."""
+        engine = SedonaDBEngine()
         engine.connect()
 
         version = engine.get_version()
 
-        # DuckDB version format is "vX.Y.Z" (e.g., "v1.4.2")
-        assert version.startswith("v")
-        assert "." in version
+        assert version is not None
+        assert isinstance(version, str)
         engine.close()
 
 
-class TestDuckDBEngineQueries:
-    """Tests for DuckDB query execution."""
+class TestSedonaDBEngineQueries:
+    """Tests for SedonaDB query execution."""
 
     def test_run_query_returns_query_result(self):
         """run_query() returns a QueryResult."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
         engine.connect()
 
         result = engine.run_query("test", "SELECT 1 AS x")
 
         assert isinstance(result, QueryResult)
         assert result.query_name == "test"
-        assert result.engine == "duckdb"
+        assert result.engine == "sedonadb"
         engine.close()
 
     def test_run_query_success(self):
         """Successful query returns success=True with row count."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
         engine.connect()
 
-        result = engine.run_query("test", "SELECT * FROM (VALUES (1), (2), (3)) AS t(x)")
+        result = engine.run_query("test", "SELECT 1 AS x UNION ALL SELECT 2 UNION ALL SELECT 3")
 
         assert result.success is True
         assert result.row_count == 3
@@ -131,19 +131,18 @@ class TestDuckDBEngineQueries:
 
     def test_run_query_failure(self):
         """Failed query returns success=False with error message."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
         engine.connect()
 
-        result = engine.run_query("test", "SELECT * FROM nonexistent_table")
+        result = engine.run_query("test", "SELECT * FROM nonexistent_table_xyz")
 
         assert result.success is False
         assert result.error_message is not None
-        assert "nonexistent_table" in result.error_message.lower()
         engine.close()
 
     def test_run_query_without_connect_fails(self):
         """run_query() without connect() returns failure."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
 
         result = engine.run_query("test", "SELECT 1")
 
@@ -151,23 +150,37 @@ class TestDuckDBEngineQueries:
         assert "not established" in result.error_message.lower()
 
 
-class TestDuckDBEngineSpatial:
-    """Tests for DuckDB spatial functionality."""
+class TestSedonaDBEngineSpatial:
+    """Tests for SedonaDB spatial functionality."""
 
-    def test_spatial_extension_loaded(self):
-        """Spatial extension is loaded on connect."""
-        engine = DuckDBEngine()
+    def test_spatial_function_works(self):
+        """Spatial functions work in SedonaDB."""
+        engine = SedonaDBEngine()
         engine.connect()
 
-        # This should work if spatial extension is loaded
-        result = engine.run_query("spatial_test", "SELECT ST_Point(0, 0)")
+        result = engine.run_query("spatial_test", "SELECT ST_Point(0, 0) AS geom")
 
         assert result.success is True
+        assert result.row_count == 1
         engine.close()
 
-    def test_warmup_runs_spatial_query(self):
-        """warmup() exercises spatial functions."""
-        engine = DuckDBEngine()
+    def test_st_geomfromtext_works(self):
+        """ST_GeomFromText works for WKT parsing."""
+        engine = SedonaDBEngine()
+        engine.connect()
+
+        result = engine.run_query(
+            "wkt_test",
+            "SELECT ST_GeomFromText('POINT(1 2)') AS geom"
+        )
+
+        assert result.success is True
+        assert result.row_count == 1
+        engine.close()
+
+    def test_warmup_runs_without_error(self):
+        """warmup() executes without raising."""
+        engine = SedonaDBEngine()
         engine.connect()
 
         # Should not raise
@@ -176,12 +189,13 @@ class TestDuckDBEngineSpatial:
         engine.close()
 
 
-class TestDuckDBEngineDataLoading:
-    """Tests for DuckDB data loading functionality."""
+class TestSedonaDBEngineDataLoading:
+    """Tests for SedonaDB data loading functionality."""
 
     @pytest.fixture
     def sample_parquet_dir(self):
         """Create a temporary directory with sample Parquet files."""
+        pyarrow = pytest.importorskip("pyarrow")
         import pyarrow as pa
         import pyarrow.parquet as pq
 
@@ -190,15 +204,15 @@ class TestDuckDBEngineDataLoading:
 
             # Create a simple trip.parquet file
             table = pa.table({
-                "trip_id": [1, 2, 3],
-                "fare": [10.0, 20.0, 30.0],
+                "t_tripkey": [1, 2, 3],
+                "t_fare": [10.0, 20.0, 30.0],
             })
             pq.write_table(table, tmppath / "trip.parquet")
 
             # Create customer.parquet
             table = pa.table({
-                "customer_id": [1, 2],
-                "name": ["Alice", "Bob"],
+                "c_custkey": [1, 2],
+                "c_name": ["Alice", "Bob"],
             })
             pq.write_table(table, tmppath / "customer.parquet")
 
@@ -206,9 +220,7 @@ class TestDuckDBEngineDataLoading:
 
     def test_load_data_creates_views(self, sample_parquet_dir):
         """load_data() creates views for Parquet files."""
-        pyarrow = pytest.importorskip("pyarrow")
-
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
         engine.connect()
 
         engine.load_data(sample_parquet_dir, scale_factor=1.0)
@@ -222,17 +234,43 @@ class TestDuckDBEngineDataLoading:
 
     def test_load_data_missing_dir_raises(self):
         """load_data() raises FileNotFoundError for missing directory."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
         engine.connect()
 
         with pytest.raises(FileNotFoundError):
-            engine.load_data(Path("/nonexistent/path"), scale_factor=1.0)
+            engine.load_data(Path("/nonexistent/path/that/does/not/exist"), scale_factor=1.0)
 
         engine.close()
 
     def test_load_data_without_connect_raises(self):
         """load_data() without connect() raises RuntimeError."""
-        engine = DuckDBEngine()
+        engine = SedonaDBEngine()
 
         with pytest.raises(RuntimeError, match="not established"):
             engine.load_data(Path("."), scale_factor=1.0)
+
+
+class TestSedonaDBEngineRegistry:
+    """Tests for SedonaDB engine registration."""
+
+    def test_sedonadb_in_engines_registry(self):
+        """sedonadb is registered in ENGINES."""
+        from benchmark.engines import ENGINES
+
+        assert "sedonadb" in ENGINES
+
+    def test_get_engine_returns_sedonadb(self):
+        """get_engine('sedonadb') returns SedonaDBEngine."""
+        from benchmark.engines import get_engine
+
+        engine = get_engine("sedonadb")
+
+        assert isinstance(engine, SedonaDBEngine)
+
+    def test_list_engines_includes_sedonadb(self):
+        """list_engines() includes 'sedonadb'."""
+        from benchmark.engines import list_engines
+
+        engines = list_engines()
+
+        assert "sedonadb" in engines

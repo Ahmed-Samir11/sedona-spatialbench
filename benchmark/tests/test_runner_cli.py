@@ -142,3 +142,10 @@ class TestRunnerOptions:
 
         assert "json" in result.stdout
         assert "csv" in result.stdout
+
+    def test_include_load_time_flag_accepted(self):
+        """--include-load-time flag is accepted and documented."""
+        result = run_runner("--help")
+
+        assert "--include-load-time" in result.stdout
+        assert "data loading time" in result.stdout.lower() or "load time" in result.stdout.lower()
