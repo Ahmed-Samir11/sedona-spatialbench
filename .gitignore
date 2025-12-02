@@ -4,10 +4,15 @@ __old/
 Cargo.lock
 .idea
 .venv/
+spatialbench/
 site/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Generated benchmark data
+sf1-parquet/
+data-sf*/
 
 # Software Design Specification (generated docs)
 docs/sds/

@@ -212,7 +212,7 @@ class BenchmarkEngine(ABC):
         pass
 
     @abstractmethod
-    def run_query(self, query_name: str, query_sql: str) -> QueryResult:
+    def run_query(self, query_name: str, query_sql: str, timeout: int = 1200) -> QueryResult:
         """Execute a benchmark query and measure performance.
 
         This method should:

@@ -90,6 +90,9 @@ class DuckDBEngine(BenchmarkEngine):
         except Exception as e:
             raise RuntimeError(f"Failed to load DuckDB spatial extension: {e}") from e
 
+        # Disable external file cache for consistency
+        self._conn.execute("SET enable_external_file_cache = false")
+
         logger.info("DuckDB connection established with spatial extension")
 
     def load_data(self, data_dir: Path, scale_factor: float) -> None:
