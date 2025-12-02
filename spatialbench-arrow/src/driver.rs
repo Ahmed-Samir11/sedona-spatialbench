@@ -16,7 +16,7 @@
 // under the License.
 
 use crate::conversions::string_view_array_from_display_iter;
-use crate::{DEFAULT_BATCH_SIZE, RecordBatchIterator};
+use crate::{RecordBatchIterator, DEFAULT_BATCH_SIZE};
 use arrow::array::{Int64Array, RecordBatch, StringViewArray};
 use arrow::datatypes::{DataType, Field, Schema, SchemaRef};
 use spatialbench::generators::{DriverGenerator, DriverGeneratorIterator};

@@ -16,7 +16,7 @@
 // under the License.
 
 use crate::conversions::{decimal128_array_from_iter, to_arrow_timestamp_millis};
-use crate::{DEFAULT_BATCH_SIZE, RecordBatchIterator};
+use crate::{RecordBatchIterator, DEFAULT_BATCH_SIZE};
 use arrow::array::{BinaryArray, Int64Array, RecordBatch, TimestampMillisecondArray};
 use arrow::datatypes::{DataType, Field, Schema, SchemaRef, TimeUnit};
 use geo::Geometry;

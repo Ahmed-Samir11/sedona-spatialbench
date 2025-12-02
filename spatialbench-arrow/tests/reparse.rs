@@ -34,8 +34,8 @@ use std::sync::Arc;
 use arrow::array::Array;
 use arrow::array::BinaryArray;
 use geo::Geometry;
-use geozero::ToGeo;
 use geozero::wkb::Wkb;
+use geozero::ToGeo;
 
 /// Macro that defines tests for tbl for a given type
 macro_rules! test_row_type {

@@ -185,11 +185,9 @@ Before publishing, verify that:
    cargo build --workspace --release
    ```
 
-3. Check for any issues with `cargo publish --dry-run`:
+3. Check for any issues with `dry run`:
    ```shell
-   cd spatialbench && cargo publish --dry-run
-   cd ../spatialbench-arrow && cargo publish --dry-run
-   cd ../spatialbench-cli && cargo publish --dry-run
+   cargo publish --dry-run
    ```
 
 ### Publishing order
