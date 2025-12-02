@@ -7,6 +7,9 @@
 # === Core Dependencies (always required) ===
 # (none - pure Python benchmark framework)
 
+# === Testing ===
+pytest>=7.0.0
+
 # === DuckDB Engine (reference implementation) ===
 duckdb>=1.0.0
 

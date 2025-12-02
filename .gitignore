@@ -5,3 +5,9 @@ Cargo.lock
 .idea
 .venv/
 site/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Software Design Specification (generated docs)
+docs/sds/
